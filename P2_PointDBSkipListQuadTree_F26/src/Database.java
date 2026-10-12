@@ -16,17 +16,23 @@ public class Database {
     }
 
 
-    public void insert(String name, int x, int y) {
-        Point pt = new Point(name, x, y);
-        if (pt.isInvalid()) {
-            System.out.println("Point rejected: (" + x + ", " + y + ")");
-            return;
-        }
-        list.insert(new KVPair<>(name, pt));
-        quadTree.insert(pt);
-        System.out.println("Point inserted: (" + name + ", " + x + ", " + y
-            + ")");
+    
+public void insert(String name, int x, int y) {
+    Point pt = new Point(name, x, y);
+
+    if (pt.isInvalid()) {
+        System.out.println("Point rejected: (" + name + ", "
+            + x + ", " + y + ")");
+        return;
     }
+
+    list.insert(new KVPair<>(name, pt));
+    quadTree.insert(pt);
+
+    System.out.println("Point inserted: (" + name + ", "
+        + x + ", " + y + ")");
+}
+
 
 
     public void remove(String name) {
