@@ -26,7 +26,8 @@ public class PointsProject {
         String commandFile = args[0].trim();
         File theFile = new File(commandFile);
         if (!theFile.exists()) {
-            System.out.println("There is no such input file as |" + commandFile
+            System.out
+                .println("There is no such input file as |" + commandFile
                 + "|");
             return;
         }

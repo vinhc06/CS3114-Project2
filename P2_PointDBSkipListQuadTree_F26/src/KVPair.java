@@ -8,9 +8,9 @@
  * @author CS Staff
  * @version September 2026
  */
-public class KVPair<K extends Comparable<K>, E> 
+public class KVPair<K extends Comparable<K>, E>
     implements Comparable<KVPair<K, E>> {
-    
+
     private K theKey; // The key
     private E theVal; // The value
 
