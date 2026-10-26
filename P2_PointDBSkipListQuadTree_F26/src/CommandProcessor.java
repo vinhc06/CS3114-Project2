@@ -1,76 +1,99 @@
+
 /**
- * The purpose of this class is to parse a text file into its appropriate, line
- * by line commands for the format specified in Project 2.
- * 
+ * Reads and processes commands for the PointDB project.
+ * Uses Database to perform SkipList and QuadTree operations.
+ *
  * @author Mahro Kim, Vinh Chau
- * @version 2026-10-04
+ * @version 2026-10-25
  */
 public class CommandProcessor {
 
     private Database data;
 
     /**
-     * Creates and initializes the command processor and database.
+     * Creates a command processor with an empty database.
      */
     public CommandProcessor() {
         data = new Database();
     }
 
+
     /**
-     * Processes one command from input.
+     * Processes a single command from the input file.
      *
      * @param line
-     *            a single line from the text file
+     *            command to process
      */
     public void processor(String line) {
-        line = line.trim();
-        if (line.isEmpty()) {
+        if (line == null || line.trim().isEmpty()) {
             return;
         }
 
-        String[] arr = line.split("\\s+");
+        String[] arr = line.trim().split("\\s+");
         String command = arr[0];
 
-        if (command.equals("insert")) {
-            String name = arr[1];
-            int x = Integer.parseInt(arr[2]);
-            int y = Integer.parseInt(arr[3]);
+        try {
+            if (command.equals("insert")) {
+                if (arr.length != 4) {
+                    return;
+                }
 
-            data.insert(name, x, y);
-        }
-        else if (command.equals("remove")) {
-            int numParam = arr.length - 1;
+                String name = arr[1];
+                int x = Integer.parseInt(arr[2]);
+                int y = Integer.parseInt(arr[3]);
 
-            // Remove by name: remove <name>
-            if (numParam == 1) {
-                data.remove(arr[1]);
+                data.insert(name, x, y);
             }
-            // Remove by coordinates: remove <x> <y>
-            else if (numParam == 2) {
+            else if (command.equals("remove")) {
+                if (arr.length == 2) {
+                    data.remove(arr[1]);
+                }
+                else if (arr.length == 3) {
+                    int x = Integer.parseInt(arr[1]);
+                    int y = Integer.parseInt(arr[2]);
+
+                    data.remove(x, y);
+                }
+            }
+            else if (command.equals("regionsearch")) {
+                if (arr.length != 5) {
+                    return;
+                }
+
                 int x = Integer.parseInt(arr[1]);
                 int y = Integer.parseInt(arr[2]);
-                data.remove(x, y);
+                int w = Integer.parseInt(arr[3]);
+                int h = Integer.parseInt(arr[4]);
+
+                data.regionsearch(x, y, w, h);
+            }
+            else if (command.equals("duplicates")) {
+                if (arr.length != 1) {
+                    return;
+                }
+
+                data.duplicates();
+            }
+            else if (command.equals("search")) {
+                if (arr.length != 2) {
+                    return;
+                }
+
+                data.search(arr[1]);
+            }
+            else if (command.equals("dump")) {
+                if (arr.length != 1) {
+                    return;
+                }
+
+                data.dump();
+            }
+            else {
+                System.out.println("Unrecognized command.");
             }
         }
-        else if (command.equals("regionsearch")) {
-            int x = Integer.parseInt(arr[1]);
-            int y = Integer.parseInt(arr[2]);
-            int w = Integer.parseInt(arr[3]);
-            int h = Integer.parseInt(arr[4]);
-
-            data.regionsearch(x, y, w, h);
-        }
-        else if (command.equals("duplicates")) {
-            data.duplicates();
-        }
-        else if (command.equals("search")) {
-            data.search(arr[1]);
-        }
-        else if (command.equals("dump")) {
-            data.dump();
-        }
-        else {
-            System.out.println("Unrecognized command.");
+        catch (NumberFormatException e) {
+            System.out.println("Invalid command arguments.");
         }
     }
 }

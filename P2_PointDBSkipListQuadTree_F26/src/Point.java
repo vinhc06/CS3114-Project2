@@ -1,6 +1,7 @@
+
 /**
  * Represents a point in 2D space.
- * 
+ *
  * @author CS Staff, Vinh Chau, Mahro Kim
  * @version 2026-10-18
  */
@@ -21,7 +22,7 @@ public class Point {
 
     /**
      * Creates a named point.
-     * 
+     *
      * @param name
      *            point identifier
      * @param x
@@ -38,7 +39,7 @@ public class Point {
 
     /**
      * Creates an unnamed point for coordinate searches.
-     * 
+     *
      * @param x
      *            x coordinate
      * @param y
@@ -51,7 +52,7 @@ public class Point {
 
     /**
      * Returns the name of the point.
-     * 
+     *
      * @return name
      */
     public String getName() {
@@ -61,7 +62,7 @@ public class Point {
 
     /**
      * Returns the x coordinate.
-     * 
+     *
      * @return x coordinate
      */
     public int getX() {
@@ -71,7 +72,7 @@ public class Point {
 
     /**
      * Returns the y coordinate.
-     * 
+     *
      * @return y coordinate
      */
     public int getY() {
@@ -81,7 +82,7 @@ public class Point {
 
     /**
      * Validates whether coordinates fall inside the world box.
-     * 
+     *
      * @return true if outside [0, 1024)
      */
     public boolean isInvalid() {
@@ -92,7 +93,7 @@ public class Point {
 
     /**
      * Compares points by coordinates.
-     * 
+     *
      * @param obj
      *            object to compare
      * @return true if x and y match
@@ -108,8 +109,19 @@ public class Point {
 
 
     /**
+     * Generates a hash code based on coordinates.
+     *
+     * @return hash code for this point
+     */
+    @Override
+    public int hashCode() {
+        return 31 * Integer.hashCode(x) + Integer.hashCode(y);
+    }
+
+
+    /**
      * Formats point as (name, x, y).
-     * 
+     *
      * @return formatted point string
      */
     @Override

@@ -1,18 +1,22 @@
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * Leaf node storing 1 to 3 points, or multiple points at the same location.
- * 
+ * Represents a leaf node in the PR QuadTree.
+ * Stores up to three points, or more if all points
+ * have identical coordinates.
+ *
  * @author CS Staff, Vinh Chau, Mahro Kim
- * @version 2026-10-18
+ * @version 2026-10-25
  */
 public class LeafNode implements QuadNode {
+
     private List<Point> points;
 
     /**
-     * Constructs a LeafNode with an empty point list.
+     * Creates an empty leaf node.
      */
     public LeafNode() {
         points = new ArrayList<>();
@@ -20,9 +24,9 @@ public class LeafNode implements QuadNode {
 
 
     /**
-     * Accessor for stored points.
-     * 
-     * @return points list
+     * Returns the points stored in this leaf.
+     *
+     * @return list of points
      */
     public List<Point> getPoints() {
         return points;
@@ -30,8 +34,10 @@ public class LeafNode implements QuadNode {
 
 
     /**
-     * Inserts a point, splitting if > 3 points with distinct coordinates.
-     * 
+     * Inserts a point into the leaf.
+     * Splits when more than three points exist
+     * at different coordinates.
+     *
      * @param p
      *            point to insert
      * @param x
@@ -40,44 +46,57 @@ public class LeafNode implements QuadNode {
      *            quadrant origin y
      * @param size
      *            quadrant dimension
-     * @return updated node
+     * @return updated QuadTree node
      */
     @Override
     public QuadNode insert(Point p, int x, int y, int size) {
         points.add(p);
 
-        if (points.size() > 3 && hasDistinctCoordinates()) {
+        if (points.size() > 3 && hasDistinctCoordinates()
+            && size > 1) {
+
             InternalNode internal = new InternalNode();
+
             for (Point pt : points) {
                 internal.insert(pt, x, y, size);
             }
+
             return internal;
         }
+
         return this;
     }
 
 
     /**
-     * Checks if distinct coordinates exist in the leaf.
-     * 
-     * @return true if at least two points differ in location
+     * Checks whether the stored points occupy
+     * different coordinates.
+     *
+     * @return true if coordinates differ
      */
     private boolean hasDistinctCoordinates() {
+        if (points.size() <= 1) {
+            return false;
+        }
+
         int firstX = points.get(0).getX();
         int firstY = points.get(0).getY();
+
         for (int i = 1; i < points.size(); i++) {
-            if (points.get(i).getX() != firstX || points.get(i)
-                .getY() != firstY) {
+            if (points.get(i).getX() != firstX
+                || points.get(i).getY() != firstY) {
+
                 return true;
             }
         }
+
         return false;
     }
 
 
     /**
-     * Removes a single matching point by name and coordinates.
-     * 
+     * Removes a single matching point from the leaf.
+     *
      * @param p
      *            point to remove
      * @param x
@@ -91,10 +110,17 @@ public class LeafNode implements QuadNode {
     @Override
     public QuadNode remove(Point p, int x, int y, int size) {
         Iterator<Point> it = points.iterator();
+
         while (it.hasNext()) {
             Point pt = it.next();
-            if (pt.getX() == p.getX() && pt.getY() == p.getY() && (p.getName()
-                .isEmpty() || pt.getName().equals(p.getName()))) {
+
+            boolean sameCoords = pt.getX() == p.getX()
+                && pt.getY() == p.getY();
+
+            boolean sameName = p.getName().isEmpty()
+                || pt.getName().equals(p.getName());
+
+            if (sameCoords && sameName) {
                 it.remove();
                 break;
             }
@@ -103,28 +129,29 @@ public class LeafNode implements QuadNode {
         if (points.isEmpty()) {
             return EmptyNode.getInstance();
         }
+
         return this;
     }
 
 
     /**
-     * Searches for points inside query rectangle.
-     * 
+     * Searches for points inside the requested rectangle.
+     *
      * @param rx
-     *            region x
+     *            rectangle x coordinate
      * @param ry
-     *            region y
+     *            rectangle y coordinate
      * @param rw
-     *            region width
+     *            rectangle width
      * @param rh
-     *            region height
+     *            rectangle height
      * @param x
      *            quadrant origin x
      * @param y
      *            quadrant origin y
      * @param size
      *            quadrant dimension
-     * @return 1
+     * @return number of nodes visited
      */
     @Override
     public int regionsearch(
@@ -135,22 +162,30 @@ public class LeafNode implements QuadNode {
         int x,
         int y,
         int size) {
+
+        long right = (long)rx + rw;
+        long bottom = (long)ry + rh;
+
         for (Point pt : points) {
             int px = pt.getX();
             int py = pt.getY();
-            if (px >= rx && px < rx + rw && py >= ry && py < ry + rh) {
-                System.out.println("Point found: " + pt.toString());
+
+            if (px >= rx && px < right
+                && py >= ry && py < bottom) {
+
+                System.out.println("Point found: " + pt);
             }
         }
+
         return 1;
     }
 
 
     /**
-     * Adds all points in this leaf to the accumulation list.
-     * 
+     * Adds all stored points to the given list.
+     *
      * @param allPoints
-     *            accumulation list
+     *            list receiving the points
      */
     @Override
     public void collectPoints(List<Point> allPoints) {
@@ -159,8 +194,8 @@ public class LeafNode implements QuadNode {
 
 
     /**
-     * Dumps the leaf node and its points with two-space indentation.
-     * 
+     * Prints this leaf and its stored points.
+     *
      * @param x
      *            quadrant origin x
      * @param y
@@ -169,20 +204,25 @@ public class LeafNode implements QuadNode {
      *            quadrant dimension
      * @param level
      *            indentation depth
-     * @return 1
+     * @return number of nodes printed
      */
     @Override
     public int dump(int x, int y, int size, int level) {
         for (int i = 0; i < level; i++) {
             System.out.print("  ");
         }
-        System.out.println("Node at " + x + ", " + y + ", " + size + ":");
+
+        System.out.println("Node at " + x + ", " + y
+            + ", " + size + ":");
+
         for (Point pt : points) {
             for (int i = 0; i < level; i++) {
                 System.out.print("  ");
             }
-            System.out.println(pt.toString());
+
+            System.out.println(pt);
         }
+
         return 1;
     }
 }

@@ -1,11 +1,13 @@
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Internal node with four quadrants (NW, NE, SW, SE).
- * 
+ * Represents an internal PR QuadTree node with four children.
+ * The children are ordered NW, NE, SW, and SE.
+ *
  * @author CS Staff, Vinh Chau, Mahro Kim
- * @version 2026-10-18
+ * @version 2026-10-25
  */
 public class InternalNode implements QuadNode {
     private QuadNode nw;
@@ -14,7 +16,7 @@ public class InternalNode implements QuadNode {
     private QuadNode se;
 
     /**
-     * Constructs an InternalNode initializing children to EmptyNode.
+     * Creates an internal node with four empty children.
      */
     public InternalNode() {
         nw = EmptyNode.getInstance();
@@ -25,17 +27,17 @@ public class InternalNode implements QuadNode {
 
 
     /**
-     * Inserts point into sub-quadrant.
-     * 
+     * Inserts a point into the correct quadrant.
+     *
      * @param p
      *            point to insert
      * @param x
-     *            quadrant origin x
+     *            quadrant x coordinate
      * @param y
-     *            quadrant origin y
+     *            quadrant y coordinate
      * @param size
-     *            quadrant dimension
-     * @return this
+     *            quadrant size
+     * @return updated internal node
      */
     @Override
     public QuadNode insert(Point p, int x, int y, int size) {
@@ -59,21 +61,23 @@ public class InternalNode implements QuadNode {
                 se = se.insert(p, x + half, y + half, half);
             }
         }
+
         return this;
     }
 
 
     /**
-     * Removes point and merges children if decomposition criteria are met.
-     * 
+     * Removes a point from the correct quadrant and
+     * merges children when possible.
+     *
      * @param p
      *            point to remove
      * @param x
-     *            quadrant origin x
+     *            quadrant x coordinate
      * @param y
-     *            quadrant origin y
+     *            quadrant y coordinate
      * @param size
-     *            quadrant dimension
+     *            quadrant size
      * @return updated node
      */
     @Override
@@ -99,6 +103,7 @@ public class InternalNode implements QuadNode {
             }
         }
 
+        // Do not merge if a child is still an internal node.
         if (nw instanceof InternalNode || ne instanceof InternalNode
             || sw instanceof InternalNode || se instanceof InternalNode) {
             return this;
@@ -111,11 +116,17 @@ public class InternalNode implements QuadNode {
             return EmptyNode.getInstance();
         }
 
-        if (remaining.size() <= 3 || !hasDistinctCoordinates(remaining)) {
+        // Merge when at most three points remain, or all
+        // remaining points share the same coordinates.
+        if (remaining.size() <= 3
+            || !hasDistinctCoordinates(remaining)) {
+
             LeafNode mergedLeaf = new LeafNode();
+
             for (Point pt : remaining) {
                 mergedLeaf.getPoints().add(pt);
             }
+
             return mergedLeaf;
         }
 
@@ -124,42 +135,46 @@ public class InternalNode implements QuadNode {
 
 
     /**
-     * Checks if distinct coordinates exist in list.
-     * 
+     * Checks whether points occupy different coordinates.
+     *
      * @param pts
      *            list of points
-     * @return true if different locations exist
+     * @return true if at least two coordinates differ
      */
     private boolean hasDistinctCoordinates(List<Point> pts) {
         int firstX = pts.get(0).getX();
         int firstY = pts.get(0).getY();
+
         for (int i = 1; i < pts.size(); i++) {
-            if (pts.get(i).getX() != firstX || pts.get(i).getY() != firstY) {
+            if (pts.get(i).getX() != firstX
+                || pts.get(i).getY() != firstY) {
+
                 return true;
             }
         }
+
         return false;
     }
 
 
     /**
-     * Recursively traverses sub-quadrants intersecting the query region.
-     * 
+     * Searches quadrants that intersect the query rectangle.
+     *
      * @param rx
-     *            region x
+     *            rectangle x
      * @param ry
-     *            region y
+     *            rectangle y
      * @param rw
-     *            region width
+     *            rectangle width
      * @param rh
-     *            region height
+     *            rectangle height
      * @param x
-     *            quadrant origin x
+     *            quadrant x
      * @param y
-     *            quadrant origin y
+     *            quadrant y
      * @param size
-     *            quadrant dimension
-     * @return visited nodes count
+     *            quadrant size
+     * @return number of visited nodes
      */
     @Override
     public int regionsearch(
@@ -170,21 +185,30 @@ public class InternalNode implements QuadNode {
         int x,
         int y,
         int size) {
+
         int visited = 1;
         int half = size / 2;
 
         if (intersects(rx, ry, rw, rh, x, y, half)) {
-            visited += nw.regionsearch(rx, ry, rw, rh, x, y, half);
+            visited += nw.regionsearch(rx, ry, rw, rh,
+                x, y, half);
         }
+
         if (intersects(rx, ry, rw, rh, x + half, y, half)) {
-            visited += ne.regionsearch(rx, ry, rw, rh, x + half, y, half);
+            visited += ne.regionsearch(rx, ry, rw, rh,
+                x + half, y, half);
         }
+
         if (intersects(rx, ry, rw, rh, x, y + half, half)) {
-            visited += sw.regionsearch(rx, ry, rw, rh, x, y + half, half);
+            visited += sw.regionsearch(rx, ry, rw, rh,
+                x, y + half, half);
         }
-        if (intersects(rx, ry, rw, rh, x + half, y + half, half)) {
-            visited += se.regionsearch(rx, ry, rw, rh, x + half, y + half,
-                half);
+
+        if (intersects(rx, ry, rw, rh,
+            x + half, y + half, half)) {
+
+            visited += se.regionsearch(rx, ry, rw, rh,
+                x + half, y + half, half);
         }
 
         return visited;
@@ -192,23 +216,23 @@ public class InternalNode implements QuadNode {
 
 
     /**
-     * Bounding box intersection check.
-     * 
+     * Checks whether a rectangle overlaps a quadrant.
+     *
      * @param rx
-     *            query box x
+     *            rectangle x
      * @param ry
-     *            query box y
+     *            rectangle y
      * @param rw
-     *            query box width
+     *            rectangle width
      * @param rh
-     *            query box height
+     *            rectangle height
      * @param qx
      *            quadrant x
      * @param qy
      *            quadrant y
      * @param qsize
-     *            quadrant dimension
-     * @return true if boxes overlap
+     *            quadrant size
+     * @return true if the areas overlap
      */
     private boolean intersects(
         int rx,
@@ -218,16 +242,22 @@ public class InternalNode implements QuadNode {
         int qx,
         int qy,
         int qsize) {
-        return rx < qx + qsize && rx + rw > qx && ry < qy + qsize && ry
-            + rh > qy;
+
+        long right = (long)rx + rw;
+        long bottom = (long)ry + rh;
+
+        return rx < qx + qsize
+            && right > qx
+            && ry < qy + qsize
+            && bottom > qy;
     }
 
 
     /**
-     * Collects all points from the four quadrants.
-     * 
+     * Collects points from all four children.
+     *
      * @param allPoints
-     *            accumulation list
+     *            list receiving the points
      */
     @Override
     public void collectPoints(List<Point> allPoints) {
@@ -239,31 +269,35 @@ public class InternalNode implements QuadNode {
 
 
     /**
-     * Preorder dump traversal.
-     * 
+     * Prints this node and recursively prints its children.
+     *
      * @param x
-     *            quadrant origin x
+     *            quadrant x
      * @param y
-     *            quadrant origin y
+     *            quadrant y
      * @param size
-     *            quadrant dimension
+     *            quadrant size
      * @param level
      *            indentation level
-     * @return node count
+     * @return total number of nodes printed
      */
     @Override
     public int dump(int x, int y, int size, int level) {
         for (int i = 0; i < level; i++) {
             System.out.print("  ");
         }
-        System.out.println("Node at " + x + ", " + y + ", " + size
-            + ": Internal");
+
+        System.out.println("Node at " + x + ", " + y
+            + ", " + size + ": Internal");
+
         int half = size / 2;
         int count = 1;
+
         count += nw.dump(x, y, half, level + 1);
         count += ne.dump(x + half, y, half, level + 1);
         count += sw.dump(x, y + half, half, level + 1);
         count += se.dump(x + half, y + half, half, level + 1);
+
         return count;
     }
 }

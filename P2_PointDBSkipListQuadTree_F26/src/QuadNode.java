@@ -1,16 +1,19 @@
+
 import java.util.List;
 
 /**
- * Base interface for QuadTree nodes.
- * 
+ * Base interface for all QuadTree nodes.
+ * Defines the operations shared by empty,
+ * leaf, and internal nodes.
+ *
  * @author CS Staff, Vinh Chau, Mahro Kim
- * @version 2026-10-18
+ * @version 2026-10-25
  */
 public interface QuadNode {
 
     /**
      * Inserts a point into the quadrant.
-     * 
+     *
      * @param p
      *            point to insert
      * @param x
@@ -26,7 +29,7 @@ public interface QuadNode {
 
     /**
      * Removes a point from the quadrant.
-     * 
+     *
      * @param p
      *            point to remove
      * @param x
@@ -41,12 +44,12 @@ public interface QuadNode {
 
 
     /**
-     * Searches for points inside the given query region.
-     * 
+     * Searches for points inside a rectangular region.
+     *
      * @param rx
-     *            region x
+     *            region x coordinate
      * @param ry
-     *            region y
+     *            region y coordinate
      * @param rw
      *            region width
      * @param rh
@@ -57,23 +60,24 @@ public interface QuadNode {
      *            quadrant origin y
      * @param size
      *            quadrant dimension
-     * @return total nodes visited
+     * @return number of QuadTree nodes visited
      */
-    int regionsearch(int rx, int ry, int rw, int rh, int x, int y, int size);
+    int regionsearch(int rx, int ry, int rw, int rh,
+        int x, int y, int size);
 
 
     /**
-     * Collects all points contained in this subtree.
-     * 
+     * Collects all points stored in this subtree.
+     *
      * @param allPoints
-     *            accumulation list
+     *            list receiving the points
      */
     void collectPoints(List<Point> allPoints);
 
 
     /**
-     * Traverses and prints this node and all descendants.
-     * 
+     * Prints this node and all its descendants.
+     *
      * @param x
      *            quadrant origin x
      * @param y
@@ -81,8 +85,8 @@ public interface QuadNode {
      * @param size
      *            quadrant dimension
      * @param level
-     *            indentation level
-     * @return total nodes printed in this subtree
+     *            indentation depth
+     * @return total number of nodes printed
      */
     int dump(int x, int y, int size, int level);
 }

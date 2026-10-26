@@ -1,26 +1,31 @@
+
 import java.util.List;
 
 /**
- * Flyweight singleton for empty leaf nodes in the PR QuadTree.
- * 
+ * Represents an empty node in the PR QuadTree.
+ * Uses the Flyweight design pattern so all empty
+ * quadrants share one instance.
+ *
  * @author CS Staff, Vinh Chau, Mahro Kim
- * @version 2026-10-18
+ * @version 2026-10-25
  */
 public class EmptyNode implements QuadNode {
+
     private static final EmptyNode INSTANCE = new EmptyNode();
 
     /**
-     * Private constructor for flyweight singleton.
+     * Private constructor to prevent other instances
+     * from being created.
      */
     private EmptyNode() {
-        // Singleton pattern
+        // Singleton instance
     }
 
 
     /**
-     * Returns the singleton instance.
-     * 
-     * @return singleton EmptyNode
+     * Returns the shared EmptyNode instance.
+     *
+     * @return the singleton EmptyNode
      */
     public static EmptyNode getInstance() {
         return INSTANCE;
@@ -28,8 +33,8 @@ public class EmptyNode implements QuadNode {
 
 
     /**
-     * Transitions empty node to a leaf node holding p.
-     * 
+     * Creates a leaf node containing the inserted point.
+     *
      * @param p
      *            point to insert
      * @param x
@@ -38,7 +43,7 @@ public class EmptyNode implements QuadNode {
      *            quadrant origin y
      * @param size
      *            quadrant dimension
-     * @return new leaf node
+     * @return new LeafNode containing the point
      */
     @Override
     public QuadNode insert(Point p, int x, int y, int size) {
@@ -48,8 +53,8 @@ public class EmptyNode implements QuadNode {
 
 
     /**
-     * Removal on empty node is a no-op.
-     * 
+     * Does nothing when removing from an empty node.
+     *
      * @param p
      *            point to remove
      * @param x
@@ -58,7 +63,7 @@ public class EmptyNode implements QuadNode {
      *            quadrant origin y
      * @param size
      *            quadrant dimension
-     * @return this
+     * @return this empty node
      */
     @Override
     public QuadNode remove(Point p, int x, int y, int size) {
@@ -67,12 +72,12 @@ public class EmptyNode implements QuadNode {
 
 
     /**
-     * Visits this empty node without output.
-     * 
+     * Counts this empty node during a region search.
+     *
      * @param rx
-     *            region x
+     *            region x coordinate
      * @param ry
-     *            region y
+     *            region y coordinate
      * @param rw
      *            region width
      * @param rh
@@ -83,7 +88,7 @@ public class EmptyNode implements QuadNode {
      *            quadrant origin y
      * @param size
      *            quadrant dimension
-     * @return 1
+     * @return one visited node
      */
     @Override
     public int regionsearch(
@@ -94,25 +99,27 @@ public class EmptyNode implements QuadNode {
         int x,
         int y,
         int size) {
+
         return 1;
     }
 
 
     /**
-     * No points to collect from an empty node.
-     * 
+     * Collects points from this node.
+     * Empty nodes contain no points.
+     *
      * @param allPoints
-     *            accumulation list
+     *            list receiving points
      */
     @Override
     public void collectPoints(List<Point> allPoints) {
-        // Intentionally empty
+        // No points to collect
     }
 
 
     /**
-     * Dumps the empty node representation.
-     * 
+     * Prints the empty node and its quadrant location.
+     *
      * @param x
      *            quadrant origin x
      * @param y
@@ -120,15 +127,18 @@ public class EmptyNode implements QuadNode {
      * @param size
      *            quadrant dimension
      * @param level
-     *            indentation level
-     * @return 1
+     *            indentation depth
+     * @return one printed node
      */
     @Override
     public int dump(int x, int y, int size, int level) {
         for (int i = 0; i < level; i++) {
             System.out.print("  ");
         }
-        System.out.println("Node at " + x + ", " + y + ", " + size + ": Empty");
+
+        System.out.println("Node at " + x + ", " + y
+            + ", " + size + ": Empty");
+
         return 1;
     }
 }
