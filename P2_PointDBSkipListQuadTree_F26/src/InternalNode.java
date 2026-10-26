@@ -246,10 +246,10 @@ public class InternalNode implements QuadNode {
         long right = (long)rx + rw;
         long bottom = (long)ry + rh;
 
-        return rx < qx + qsize
-            && right > qx
-            && ry < qy + qsize
-            && bottom > qy;
+        return rx <= qx + qsize
+            && right >= qx
+            && ry <= qy + qsize
+            && bottom >= qy;
     }
 
 

@@ -80,13 +80,13 @@ public class Database {
         KVPair<String, Point> removed = list.removeByValue(dummy);
         if (removed == null) {
             System.out.println("Point not found: (" + x + ", " + y + ")");
+            return;
         }
-        else {
-            quadTree.remove(removed.value());
-            Point p = removed.value();
-            System.out.println("Point removed: (" + removed.key() + ", " + p
-                .getX() + ", " + p.getY() + ")");
-        }
+        Point p = removed.value();
+        quadTree.remove(p);
+
+        System.out.println("Point removed: (" + removed.key() + ", " + p.getX()
+            + ", " + p.getY() + ")");
     }
 
 

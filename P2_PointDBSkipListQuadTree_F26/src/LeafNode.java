@@ -107,25 +107,16 @@ public class LeafNode implements QuadNode {
         Iterator<Point> it = points.iterator();
         while (it.hasNext()) {
             Point pt = it.next();
-            if (pt == p) {
-                it.remove();
-                if (points.isEmpty()) {
-                    return EmptyNode.getInstance();
-                }
-                return this;
-            }
-        }
-        it = points.iterator();
-        while (it.hasNext()) {
-            Point pt = it.next();
-            boolean sameCoords = pt.getX() == p.getX() && pt.getY() == p.getY();
-            boolean sameName = p.getName().isEmpty() || pt.getName().equals(p
-                .getName());
-            if (sameCoords && sameName) {
+            // Check identity or matching coordinates
+            boolean match = (pt == p) || (pt.getX() == p.getX() && pt
+                .getY() == p.getY() && (p.getName().isEmpty() || pt.getName()
+                    .equals(p.getName())));
+            if (match) {
                 it.remove();
                 break;
             }
         }
+
         if (points.isEmpty()) {
             return EmptyNode.getInstance();
         }
