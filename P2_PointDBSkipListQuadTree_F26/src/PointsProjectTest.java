@@ -527,4 +527,127 @@ public class PointsProjectTest extends TestCase {
         assertTrue(systemOut().getHistory().contains(
             "Node at 0, 0, 1024: Empty"));
     }
+
+
+    /**
+     * Precision assertions targeting surviving mutants in InternalNode,
+     * LeafNode, and QuadTree by validating exact return types and sizes.
+     */
+    public void testSlayRemainingMutants() {
+        // 1. Kill InternalNode quadrant-routing and regionsearch mutants
+        InternalNode in = new InternalNode();
+        Point pNW = new Point("nw", 100, 100);
+        Point pNE = new Point("ne", 700, 100);
+        Point pSW = new Point("sw", 100, 700);
+        Point pSE = new Point("se", 700, 700);
+
+        assertSame(in, in.insert(pNW, 0, 0, 1024));
+        assertSame(in, in.insert(pNE, 0, 0, 1024));
+        assertSame(in, in.insert(pSW, 0, 0, 1024));
+        assertSame(in, in.insert(pSE, 0, 0, 1024));
+
+        // Exact isolated single-quadrant visits: Internal (1) + Child (1) = 2
+        assertEquals(2, in.regionsearch(50, 50, 100, 100, 0, 0, 1024));
+        assertEquals(2, in.regionsearch(650, 50, 100, 100, 0, 0, 1024));
+        assertEquals(2, in.regionsearch(50, 650, 100, 100, 0, 0, 1024));
+        assertEquals(2, in.regionsearch(650, 650, 100, 100, 0, 0, 1024));
+
+        // Two-quadrant spans: Internal (1) + 2 Children (2) = 3
+        assertEquals(3, in.regionsearch(50, 50, 700, 100, 0, 0, 1024));
+        assertEquals(3, in.regionsearch(50, 50, 100, 700, 0, 0, 1024));
+
+        // 2. Kill InternalNode removal mutants (non-merging vs merging)
+        InternalNode complex = new InternalNode();
+        for (int i = 0; i < 4; i++) {
+            complex.insert(new Point("nw" + i, 10 + i, 10 + i), 0, 0, 1024);
+        }
+        complex.insert(pNE, 0, 0, 1024);
+        // Removing pNE leaves NW as an InternalNode, so it must NOT merge
+        QuadNode noMerge = complex.remove(pNE, 0, 0, 1024);
+        assertTrue(noMerge instanceof InternalNode);
+
+        // 3. Kill LeafNode coordinate and name match mutants
+        LeafNode leaf = new LeafNode();
+        Point base = new Point("target", 40, 40);
+        assertSame(leaf, leaf.insert(base, 0, 0, 1024));
+
+        // Same coord, different name -> should NOT remove
+        assertSame(leaf, leaf.remove(new Point("wrong", 40, 40), 0, 0, 1024));
+        assertEquals(1, leaf.getPoints().size());
+
+        // Same name, different X or Y -> should NOT remove
+        assertSame(leaf, leaf.remove(new Point("target", 99, 40), 0, 0, 1024));
+        assertSame(leaf, leaf.remove(new Point("target", 40, 99), 0, 0, 1024));
+        assertEquals(1, leaf.getPoints().size());
+
+        // Coordinate-only removal (empty name) -> matches and empties
+        QuadNode drained = leaf.remove(new Point(40, 40), 0, 0, 1024);
+        assertSame(EmptyNode.getInstance(), drained);
+
+        // 4. Exercise QuadTree class directly
+        QuadTree qt = new QuadTree();
+        Point q1 = new Point("q1", 25, 25);
+        Point q2 = new Point("q2", 25, 25);
+        qt.insert(q1);
+        qt.insert(q2);
+
+        systemOut().clearHistory();
+        qt.duplicates();
+        assertTrue(systemOut().getHistory().contains("(25, 25)"));
+
+        qt.remove(q1);
+        qt.remove(q2);
+        systemOut().clearHistory();
+        qt.dump();
+        assertTrue(systemOut().getHistory().contains(
+            "Node at 0, 0, 1024: Empty"));
+    }
+
+
+    /**
+     * Tests InternalNode insertion, removal, regionsearch, and merges.
+     */
+    public void testInternalNodeBranches() {
+        InternalNode in = new InternalNode();
+        Point nw = new Point("nw", 100, 100);
+        Point ne = new Point("ne", 700, 100);
+        Point sw = new Point("sw", 100, 700);
+        Point se = new Point("se", 700, 700);
+
+        // Insert into each quadrant
+        in.insert(nw, 0, 0, 1024);
+        in.insert(ne, 0, 0, 1024);
+        in.insert(sw, 0, 0, 1024);
+        in.insert(se, 0, 0, 1024);
+
+        // Dump indentation level > 0
+        systemOut().clearHistory();
+        assertEquals(5, in.dump(0, 0, 1024, 1));
+        assertTrue(systemOut().getHistory().contains(" Node at 0, 0, 1024:"));
+
+        // Regionsearch visiting specific children
+        assertEquals(2, in.regionsearch(0, 0, 200, 200, 0, 0, 1024));
+        assertEquals(2, in.regionsearch(600, 0, 200, 200, 0, 0, 1024));
+        assertEquals(2, in.regionsearch(0, 600, 200, 200, 0, 0, 1024));
+        assertEquals(2, in.regionsearch(600, 600, 200, 200, 0, 0, 1024));
+
+        // Removals across quadrants
+        in.remove(nw, 0, 0, 1024);
+        in.remove(ne, 0, 0, 1024);
+        in.remove(sw, 0, 0, 1024);
+        QuadNode allRemoved = in.remove(se, 0, 0, 1024);
+        assertTrue(allRemoved instanceof EmptyNode);
+
+        // Merge when remaining points share identical coordinates (> 3 points)
+        Database db = new Database();
+        db.insert("c1", 50, 50);
+        db.insert("c2", 50, 50);
+        db.insert("c3", 50, 50);
+        db.insert("c4", 50, 50);
+        db.insert("diff", 800, 800);
+        db.remove("diff");
+        systemOut().clearHistory();
+        db.dump();
+        assertFalse(systemOut().getHistory().contains("Internal"));
+    }
 }
