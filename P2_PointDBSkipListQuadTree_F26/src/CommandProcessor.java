@@ -51,8 +51,10 @@ public class CommandProcessor {
                 else if (arr.length == 3) {
                     int x = Integer.parseInt(arr[1]);
                     int y = Integer.parseInt(arr[2]);
-
                     data.remove(x, y);
+                }
+                else {
+                    return;
                 }
             }
             else if (command.equals("regionsearch")) {
