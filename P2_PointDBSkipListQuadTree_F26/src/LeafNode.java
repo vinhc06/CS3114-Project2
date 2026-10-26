@@ -52,8 +52,7 @@ public class LeafNode implements QuadNode {
     public QuadNode insert(Point p, int x, int y, int size) {
         points.add(p);
 
-        if (points.size() > 3 && hasDistinctCoordinates()
-            && size > 1) {
+        if (points.size() > 3 && hasDistinctCoordinates() && size > 1) {
 
             InternalNode internal = new InternalNode();
 
@@ -83,8 +82,8 @@ public class LeafNode implements QuadNode {
         int firstY = points.get(0).getY();
 
         for (int i = 1; i < points.size(); i++) {
-            if (points.get(i).getX() != firstX
-                || points.get(i).getY() != firstY) {
+            if (points.get(i).getX() != firstX || points.get(i)
+                .getY() != firstY) {
 
                 return true;
             }
@@ -110,26 +109,30 @@ public class LeafNode implements QuadNode {
     @Override
     public QuadNode remove(Point p, int x, int y, int size) {
         Iterator<Point> it = points.iterator();
-
         while (it.hasNext()) {
             Point pt = it.next();
-
-            boolean sameCoords = pt.getX() == p.getX()
-                && pt.getY() == p.getY();
-
-            boolean sameName = p.getName().isEmpty()
-                || pt.getName().equals(p.getName());
-
+            if (pt == p) {
+                it.remove();
+                if (points.isEmpty()) {
+                    return EmptyNode.getInstance();
+                }
+                return this;
+            }
+        }
+        it = points.iterator();
+        while (it.hasNext()) {
+            Point pt = it.next();
+            boolean sameCoords = pt.getX() == p.getX() && pt.getY() == p.getY();
+            boolean sameName = p.getName().isEmpty() || pt.getName().equals(p
+                .getName());
             if (sameCoords && sameName) {
                 it.remove();
                 break;
             }
         }
-
         if (points.isEmpty()) {
             return EmptyNode.getInstance();
         }
-
         return this;
     }
 
@@ -170,8 +173,7 @@ public class LeafNode implements QuadNode {
             int px = pt.getX();
             int py = pt.getY();
 
-            if (px >= rx && px < right
-                && py >= ry && py < bottom) {
+            if (px >= rx && px < right && py >= ry && py < bottom) {
 
                 System.out.println("Point found: " + pt);
             }
@@ -212,8 +214,7 @@ public class LeafNode implements QuadNode {
             System.out.print("  ");
         }
 
-        System.out.println("Node at " + x + ", " + y
-            + ", " + size + ":");
+        System.out.println("Node at " + x + ", " + y + ", " + size + ":");
 
         for (Point pt : points) {
             for (int i = 0; i < level; i++) {

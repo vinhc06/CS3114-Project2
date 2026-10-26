@@ -14,75 +14,55 @@ public class PointsProjectTest extends TestCase {
      * Tests running the provided syntax files.
      *
      * @throws Exception
-     *                   if an input error occurs
+     *             if an input error occurs
      */
 
     /**
-     * Tests reading and processing commands from a file.
-     *
+     * Tests reading and processing commands from the provided syntax files.
+     * 
      * @throws Exception
-     *                   if file operations fail
+     *             if file operations fail
      */
     public void testSyntaxFiles() throws Exception {
-        java.io.File file = java.io.File.createTempFile(
-                "pointdb_test_", ".txt");
+        PointsProject.main(new String[] { "SyntaxTest1.txt" });
+        String out1 = systemOut().getHistory();
+        assertTrue(out1.contains("Point rejected: (p_p, -1, -20)"));
+        assertTrue(out1.contains("SkipList dump:"));
+        assertTrue(out1.contains("QuadTree dump:"));
+        assertTrue(out1.contains("1 quadtree nodes printed"));
 
-        file.deleteOnExit();
-
-        try (java.io.PrintWriter writer = new java.io.PrintWriter(file)) {
-
-            writer.println("insert alpha 100 100");
-            writer.println("insert beta 700 700");
-            writer.println("search alpha");
-            writer.println("regionsearch 0 0 200 200");
-            writer.println("duplicates");
-            writer.println("dump");
-            writer.println("remove alpha");
-            writer.println("search alpha");
-        }
-
-        PointsProject.main(new String[] {
-                file.getAbsolutePath()
-        });
-
-        String out = systemOut().getHistory();
-
-        assertTrue(out.contains(
-                "Point inserted: (alpha, 100, 100)"));
-        assertTrue(out.contains(
-                "Point inserted: (beta, 700, 700)"));
-        assertTrue(out.contains(
-                "Found (alpha, 100, 100)"));
-        assertTrue(out.contains(
-                "Point found: (alpha, 100, 100)"));
-        assertTrue(out.contains("Duplicate points:"));
-        assertTrue(out.contains("SkipList dump:"));
-        assertTrue(out.contains("QuadTree dump:"));
-        assertTrue(out.contains(
-                "Point removed: (alpha, 100, 100)"));
-        assertTrue(out.contains(
-                "Point not found: alpha"));
+        systemOut().clearHistory();
+        PointsProject.main(new String[] { "SyntaxTest2.txt" });
+        String out2 = systemOut().getHistory();
+        assertTrue(out2.contains("Point inserted: (p_p, 1, 20)"));
+        assertTrue(out2.contains("Point inserted: (far, 200, 200)"));
+        assertTrue(out2.contains("Value (far, 200, 200)"));
+        assertTrue(out2.contains("13 quadtree nodes printed"));
+        assertTrue(out2.contains("Point found: (p_p, 1, 20)"));
+        assertTrue(out2.contains("4 quadtree nodes visited"));
+        assertTrue(out2.contains("Point removed: (p_p, 1, 20)"));
     }
+
 
     /**
      * Tests missing arguments and invalid files.
      *
      * @throws Exception
-     *                   if an input error occurs
+     *             if an input error occurs
      */
     public void testMainBadArgs() throws Exception {
         PointsProject.main(new String[] {});
 
-        assertTrue(systemOut().getHistory().contains(
-                "Usage: PointsProject"));
+        assertTrue(systemOut().getHistory().contains("Usage: PointsProject"));
 
         systemOut().clearHistory();
 
         PointsProject.main(new String[] { "nonexistent_file.txt" });
 
         assertTrue(systemOut().getHistory().contains(
-                "There is no such input file"));
+            "There is no such input file"));
     }
+
 
     /**
      * Tests inserting valid and invalid points.
@@ -107,6 +87,7 @@ public class PointsProjectTest extends TestCase {
         assertTrue(out.contains("Point rejected: (overY, 50, 1024)"));
     }
 
+
     /**
      * Tests searching the SkipList.
      */
@@ -116,7 +97,7 @@ public class PointsProjectTest extends TestCase {
         db.search("missing");
 
         assertTrue(systemOut().getHistory().contains(
-                "Point not found: missing"));
+            "Point not found: missing"));
 
         db.insert("point", 10, 20);
         db.insert("point", 30, 40);
@@ -129,6 +110,7 @@ public class PointsProjectTest extends TestCase {
         assertTrue(out.contains("Found (point, 10, 20)"));
         assertTrue(out.contains("Found (point, 30, 40)"));
     }
+
 
     /**
      * Tests splitting into four quadrants.
@@ -146,8 +128,7 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Node at 0, 0, 1024: Internal"));
+        assertTrue(out.contains("Node at 0, 0, 1024: Internal"));
         assertTrue(out.contains("Node at 0, 0, 512:"));
         assertTrue(out.contains("(nw, 100, 100)"));
         assertTrue(out.contains("(ne, 700, 100)"));
@@ -155,6 +136,7 @@ public class PointsProjectTest extends TestCase {
         assertTrue(out.contains("(se, 700, 700)"));
         assertTrue(out.contains("5 quadtree nodes printed"));
     }
+
 
     /**
      * Tests splitting deeper than the root.
@@ -173,13 +155,12 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Node at 0, 0, 1024: Internal"));
-        assertTrue(out.contains(
-                "Node at 0, 0, 512: Internal"));
+        assertTrue(out.contains("Node at 0, 0, 1024: Internal"));
+        assertTrue(out.contains("Node at 0, 0, 512: Internal"));
         assertTrue(out.contains("(a, 10, 10)"));
         assertTrue(out.contains("(e, 50, 50)"));
     }
+
 
     /**
      * Tests duplicate coordinates without splitting.
@@ -199,8 +180,7 @@ public class PointsProjectTest extends TestCase {
         String out = systemOut().getHistory();
 
         assertTrue(out.contains("Node at 0, 0, 1024:"));
-        assertFalse(out.contains(
-                "Node at 0, 0, 1024: Internal"));
+        assertFalse(out.contains("Node at 0, 0, 1024: Internal"));
         assertTrue(out.contains("1 quadtree nodes printed"));
 
         systemOut().clearHistory();
@@ -208,6 +188,7 @@ public class PointsProjectTest extends TestCase {
 
         assertTrue(systemOut().getHistory().contains("(50, 50)"));
     }
+
 
     /**
      * Tests duplicate names with different coordinates.
@@ -229,6 +210,7 @@ public class PointsProjectTest extends TestCase {
         assertTrue(out.contains("Found (same, 300, 300)"));
     }
 
+
     /**
      * Tests removal and merging.
      */
@@ -237,15 +219,15 @@ public class PointsProjectTest extends TestCase {
 
         db.remove("missing");
         assertTrue(systemOut().getHistory().contains(
-                "Point not removed: missing"));
+            "Point not removed: missing"));
 
         db.remove(-1, -1);
         assertTrue(systemOut().getHistory().contains(
-                "Point rejected: (-1, -1)"));
+            "Point rejected: (-1, -1)"));
 
         db.remove(500, 500);
         assertTrue(systemOut().getHistory().contains(
-                "Point not found: (500, 500)"));
+            "Point not found: (500, 500)"));
 
         db.insert("a", 100, 100);
         db.insert("b", 700, 100);
@@ -256,7 +238,7 @@ public class PointsProjectTest extends TestCase {
         db.remove("a");
 
         assertTrue(systemOut().getHistory().contains(
-                "Point removed: (a, 100, 100)"));
+            "Point removed: (a, 100, 100)"));
 
         systemOut().clearHistory();
         db.dump();
@@ -275,8 +257,9 @@ public class PointsProjectTest extends TestCase {
         db.dump();
 
         assertTrue(systemOut().getHistory().contains(
-                "Node at 0, 0, 1024: Empty"));
+            "Node at 0, 0, 1024: Empty"));
     }
+
 
     /**
      * Tests removing one of several duplicate coordinates.
@@ -313,6 +296,7 @@ public class PointsProjectTest extends TestCase {
         assertEquals(2, remaining);
     }
 
+
     /**
      * Tests removal from an empty database.
      */
@@ -328,6 +312,7 @@ public class PointsProjectTest extends TestCase {
         assertTrue(out.contains("Point not found: (100, 100)"));
     }
 
+
     /**
      * Tests region searching and invalid dimensions.
      */
@@ -337,7 +322,7 @@ public class PointsProjectTest extends TestCase {
         db.regionsearch(0, 0, -5, 10);
 
         assertTrue(systemOut().getHistory().contains(
-                "Rectangle rejected: (0, 0, -5, 10)"));
+            "Rectangle rejected: (0, 0, -5, 10)"));
 
         db.insert("inside", 50, 50);
         db.insert("outside", 500, 500);
@@ -347,12 +332,11 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (inside, 50, 50)"));
-        assertFalse(out.contains(
-                "Point found: (outside, 500, 500)"));
+        assertTrue(out.contains("Point found: (inside, 50, 50)"));
+        assertFalse(out.contains("Point found: (outside, 500, 500)"));
         assertTrue(out.contains("quadtree nodes visited"));
     }
+
 
     /**
      * Tests a region crossing quadrant boundaries.
@@ -370,15 +354,12 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (nw, 500, 500)"));
-        assertTrue(out.contains(
-                "Point found: (ne, 520, 500)"));
-        assertTrue(out.contains(
-                "Point found: (sw, 500, 520)"));
-        assertTrue(out.contains(
-                "Point found: (se, 520, 520)"));
+        assertTrue(out.contains("Point found: (nw, 500, 500)"));
+        assertTrue(out.contains("Point found: (ne, 520, 500)"));
+        assertTrue(out.contains("Point found: (sw, 500, 520)"));
+        assertTrue(out.contains("Point found: (se, 520, 520)"));
     }
+
 
     /**
      * Tests searching a region without points.
@@ -394,10 +375,11 @@ public class PointsProjectTest extends TestCase {
         String out = systemOut().getHistory();
 
         assertTrue(out.contains(
-                "Points intersecting region (0, 0, 100, 100):"));
+            "Points intersecting region (0, 0, 100, 100):"));
         assertFalse(out.contains("Point found:"));
         assertTrue(out.contains("quadtree nodes visited"));
     }
+
 
     /**
      * Tests duplicate coordinate reporting.
@@ -421,6 +403,7 @@ public class PointsProjectTest extends TestCase {
         assertFalse(out.contains("(300, 300)"));
     }
 
+
     /**
      * Tests dumping an empty database.
      */
@@ -431,11 +414,11 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Node at 0, 0, 1024: Empty"));
+        assertTrue(out.contains("Node at 0, 0, 1024: Empty"));
         assertTrue(out.contains("1 quadtree nodes printed"));
         assertTrue(out.contains("SkipList size is: 0"));
     }
+
 
     /**
      * Tests commands through the command processor.
@@ -446,25 +429,24 @@ public class PointsProjectTest extends TestCase {
         cp.processor("insert alpha 100 100");
 
         assertTrue(systemOut().getHistory().contains(
-                "Point inserted: (alpha, 100, 100)"));
+            "Point inserted: (alpha, 100, 100)"));
 
         systemOut().clearHistory();
         cp.processor("search alpha");
 
         assertTrue(systemOut().getHistory().contains(
-                "Found (alpha, 100, 100)"));
+            "Found (alpha, 100, 100)"));
 
         systemOut().clearHistory();
         cp.processor("regionsearch 0 0 200 200");
 
         assertTrue(systemOut().getHistory().contains(
-                "Point found: (alpha, 100, 100)"));
+            "Point found: (alpha, 100, 100)"));
 
         systemOut().clearHistory();
         cp.processor("duplicates");
 
-        assertTrue(systemOut().getHistory().contains(
-                "Duplicate points:"));
+        assertTrue(systemOut().getHistory().contains("Duplicate points:"));
 
         systemOut().clearHistory();
         cp.processor("dump");
@@ -478,7 +460,7 @@ public class PointsProjectTest extends TestCase {
         cp.processor("remove alpha");
 
         assertTrue(systemOut().getHistory().contains(
-                "Point removed: (alpha, 100, 100)"));
+            "Point removed: (alpha, 100, 100)"));
 
         cp.processor("insert beta 200 200");
 
@@ -486,14 +468,14 @@ public class PointsProjectTest extends TestCase {
         cp.processor("remove 200 200");
 
         assertTrue(systemOut().getHistory().contains(
-                "Point removed: (beta, 200, 200)"));
+            "Point removed: (beta, 200, 200)"));
 
         systemOut().clearHistory();
         cp.processor("unknown");
 
-        assertTrue(systemOut().getHistory().contains(
-                "Unrecognized command."));
+        assertTrue(systemOut().getHistory().contains("Unrecognized command."));
     }
+
 
     /**
      * Tests malformed commands and invalid arguments.
@@ -514,20 +496,21 @@ public class PointsProjectTest extends TestCase {
         cp.processor("insert bad abc 20");
 
         assertTrue(systemOut().getHistory().contains(
-                "Invalid command arguments."));
+            "Invalid command arguments."));
 
         systemOut().clearHistory();
         cp.processor("remove abc 20");
 
         assertTrue(systemOut().getHistory().contains(
-                "Invalid command arguments."));
+            "Invalid command arguments."));
 
         systemOut().clearHistory();
         cp.processor("regionsearch 0 0 abc 10");
 
         assertTrue(systemOut().getHistory().contains(
-                "Invalid command arguments."));
+            "Invalid command arguments."));
     }
+
 
     /**
      * Tests region searching in each quadrant.
@@ -545,14 +528,10 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (nw, 100, 100)"));
-        assertFalse(out.contains(
-                "Point found: (ne, 900, 100)"));
-        assertFalse(out.contains(
-                "Point found: (sw, 100, 900)"));
-        assertFalse(out.contains(
-                "Point found: (se, 900, 900)"));
+        assertTrue(out.contains("Point found: (nw, 100, 100)"));
+        assertFalse(out.contains("Point found: (ne, 900, 100)"));
+        assertFalse(out.contains("Point found: (sw, 100, 900)"));
+        assertFalse(out.contains("Point found: (se, 900, 900)"));
         assertTrue(out.contains("2 quadtree nodes visited"));
 
         systemOut().clearHistory();
@@ -560,10 +539,8 @@ public class PointsProjectTest extends TestCase {
 
         out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (ne, 900, 100)"));
-        assertFalse(out.contains(
-                "Point found: (nw, 100, 100)"));
+        assertTrue(out.contains("Point found: (ne, 900, 100)"));
+        assertFalse(out.contains("Point found: (nw, 100, 100)"));
         assertTrue(out.contains("2 quadtree nodes visited"));
 
         systemOut().clearHistory();
@@ -571,10 +548,8 @@ public class PointsProjectTest extends TestCase {
 
         out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (sw, 100, 900)"));
-        assertFalse(out.contains(
-                "Point found: (se, 900, 900)"));
+        assertTrue(out.contains("Point found: (sw, 100, 900)"));
+        assertFalse(out.contains("Point found: (se, 900, 900)"));
         assertTrue(out.contains("2 quadtree nodes visited"));
 
         systemOut().clearHistory();
@@ -582,12 +557,11 @@ public class PointsProjectTest extends TestCase {
 
         out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (se, 900, 900)"));
-        assertFalse(out.contains(
-                "Point found: (sw, 100, 900)"));
+        assertTrue(out.contains("Point found: (se, 900, 900)"));
+        assertFalse(out.contains("Point found: (sw, 100, 900)"));
         assertTrue(out.contains("2 quadtree nodes visited"));
     }
+
 
     /**
      * Tests points on quadrant boundaries.
@@ -605,8 +579,7 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Node at 0, 0, 1024: Internal"));
+        assertTrue(out.contains("Node at 0, 0, 1024: Internal"));
         assertTrue(out.contains("Node at 0, 0, 512:"));
         assertTrue(out.contains("Node at 512, 0, 512:"));
         assertTrue(out.contains("Node at 0, 512, 512:"));
@@ -618,16 +591,13 @@ public class PointsProjectTest extends TestCase {
 
         out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (d, 512, 512)"));
-        assertFalse(out.contains(
-                "Point found: (a, 511, 511)"));
-        assertFalse(out.contains(
-                "Point found: (b, 512, 511)"));
-        assertFalse(out.contains(
-                "Point found: (c, 511, 512)"));
+        assertTrue(out.contains("Point found: (d, 512, 512)"));
+        assertFalse(out.contains("Point found: (a, 511, 511)"));
+        assertFalse(out.contains("Point found: (b, 512, 511)"));
+        assertFalse(out.contains("Point found: (c, 511, 512)"));
         assertTrue(out.contains("2 quadtree nodes visited"));
     }
+
 
     /**
      * Tests removal and merging from different quadrants.
@@ -662,10 +632,10 @@ public class PointsProjectTest extends TestCase {
 
         out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Node at 0, 0, 1024: Empty"));
+        assertTrue(out.contains("Node at 0, 0, 1024: Empty"));
         assertTrue(out.contains("1 quadtree nodes printed"));
     }
+
 
     /**
      * Tests an empty QuadTree search.
@@ -678,10 +648,11 @@ public class PointsProjectTest extends TestCase {
         String out = systemOut().getHistory();
 
         assertTrue(out.contains(
-                "Points intersecting region (0, 0, 1024, 1024):"));
+            "Points intersecting region (0, 0, 1024, 1024):"));
         assertFalse(out.contains("Point found:"));
         assertTrue(out.contains("1 quadtree nodes visited"));
     }
+
 
     /**
      * Tests rectangle searches touching world boundaries.
@@ -697,10 +668,8 @@ public class PointsProjectTest extends TestCase {
 
         String out = systemOut().getHistory();
 
-        assertTrue(out.contains(
-                "Point found: (first, 0, 0)"));
-        assertTrue(out.contains(
-                "Point found: (last, 1023, 1023)"));
+        assertTrue(out.contains("Point found: (first, 0, 0)"));
+        assertTrue(out.contains("Point found: (last, 1023, 1023)"));
 
         systemOut().clearHistory();
         db.regionsearch(1024, 1024, 10, 10);

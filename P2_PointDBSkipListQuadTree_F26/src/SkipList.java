@@ -64,9 +64,8 @@ public class SkipList<K extends Comparable<K>, V>
         SkipNode current = head;
 
         for (int i = head.level - 1; i >= 0; i--) {
-            while (current.forward[i] != null
-                && current.forward[i].element().key()
-                    .compareTo(key) < 0) {
+            while (current.forward[i] != null && current.forward[i].element()
+                .key().compareTo(key) < 0) {
 
                 current = current.forward[i];
             }
@@ -74,8 +73,7 @@ public class SkipList<K extends Comparable<K>, V>
 
         current = current.forward[0];
 
-        while (current != null
-            && current.element().key().compareTo(key) == 0) {
+        while (current != null && current.element().key().compareTo(key) == 0) {
 
             results.add(current.element());
             current = current.forward[0];
@@ -109,15 +107,14 @@ public class SkipList<K extends Comparable<K>, V>
             adjustHead(newLevel);
         }
 
-        SkipNode[] update = (SkipNode[])Array.newInstance(
-            SkipNode.class, head.level);
+        SkipNode[] update = (SkipNode[])Array.newInstance(SkipNode.class,
+            head.level);
 
         SkipNode current = head;
 
         for (int i = head.level - 1; i >= 0; i--) {
-            while (current.forward[i] != null
-                && current.forward[i].element().key()
-                    .compareTo(it.key()) < 0) {
+            while (current.forward[i] != null && current.forward[i].element()
+                .key().compareTo(it.key()) < 0) {
 
                 current = current.forward[i];
             }
@@ -166,15 +163,14 @@ public class SkipList<K extends Comparable<K>, V>
      */
     @SuppressWarnings("unchecked")
     public KVPair<K, V> remove(K key) {
-        SkipNode[] update = (SkipNode[])Array.newInstance(
-            SkipNode.class, head.level);
+        SkipNode[] update = (SkipNode[])Array.newInstance(SkipNode.class,
+            head.level);
 
         SkipNode current = head;
 
         for (int i = head.level - 1; i >= 0; i--) {
-            while (current.forward[i] != null
-                && current.forward[i].element().key()
-                    .compareTo(key) < 0) {
+            while (current.forward[i] != null && current.forward[i].element()
+                .key().compareTo(key) < 0) {
 
                 current = current.forward[i];
             }
@@ -184,8 +180,7 @@ public class SkipList<K extends Comparable<K>, V>
 
         current = current.forward[0];
 
-        if (current == null
-            || current.element().key().compareTo(key) != 0) {
+        if (current == null || current.element().key().compareTo(key) != 0) {
 
             return null;
         }
@@ -250,13 +245,12 @@ public class SkipList<K extends Comparable<K>, V>
 
         while (current != null) {
             if (current == head) {
-                System.out.println("Node has depth "
-                    + current.level + ", Value (null)");
+                System.out.println("Node has depth " + current.level
+                    + ", Value (null)");
             }
             else {
-                System.out.println("Node has depth "
-                    + current.level + ", Value ("
-                    + current.element() + ")");
+                System.out.println("Node has depth " + current.level
+                    + ", Value " + current.element().value());
             }
 
             current = current.forward[0];
@@ -264,7 +258,6 @@ public class SkipList<K extends Comparable<K>, V>
 
         System.out.println("SkipList size is: " + size);
     }
-
 
     /**
      * Represents an individual SkipList node.
@@ -286,8 +279,7 @@ public class SkipList<K extends Comparable<K>, V>
         @SuppressWarnings("unchecked")
         public SkipNode(KVPair<K, V> tempPair, int level) {
             pair = tempPair;
-            forward = (SkipNode[])Array.newInstance(
-                SkipNode.class, level);
+            forward = (SkipNode[])Array.newInstance(SkipNode.class, level);
             this.level = level;
         }
 
@@ -306,8 +298,7 @@ public class SkipList<K extends Comparable<K>, V>
     /**
      * Iterates through the SkipList in key order.
      */
-    private class SkipListIterator
-        implements Iterator<KVPair<K, V>> {
+    private class SkipListIterator implements Iterator<KVPair<K, V>> {
 
         private SkipNode current;
 
@@ -345,7 +336,6 @@ public class SkipList<K extends Comparable<K>, V>
             return current.element();
         }
     }
-
 
     /**
      * Creates an iterator for the SkipList.
