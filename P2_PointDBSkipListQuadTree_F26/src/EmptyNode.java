@@ -136,8 +136,7 @@ public class EmptyNode implements QuadNode {
             System.out.print("  ");
         }
 
-        System.out.println("Node at " + x + ", " + y
-            + ", " + size + ": Empty");
+        System.out.println("Node at " + x + ", " + y + ", " + size + ": Empty");
 
         return 1;
     }

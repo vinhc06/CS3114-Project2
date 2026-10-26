@@ -74,10 +74,6 @@ public class LeafNode implements QuadNode {
      * @return true if coordinates differ
      */
     private boolean hasDistinctCoordinates() {
-        if (points.size() <= 1) {
-            return false;
-        }
-
         int firstX = points.get(0).getX();
         int firstY = points.get(0).getY();
 
@@ -165,20 +161,16 @@ public class LeafNode implements QuadNode {
         int x,
         int y,
         int size) {
-
         long right = (long)rx + rw;
         long bottom = (long)ry + rh;
-
         for (Point pt : points) {
             int px = pt.getX();
             int py = pt.getY();
-
-            if (px >= rx && px < right && py >= ry && py < bottom) {
-
+            // Changed < right and < bottom to <= right and <= bottom
+            if (px >= rx && px <= right && py >= ry && py <= bottom) {
                 System.out.println("Point found: " + pt);
             }
         }
-
         return 1;
     }
 
